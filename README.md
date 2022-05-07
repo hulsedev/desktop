@@ -13,3 +13,6 @@ appdmg dmg-config.json Hulse.dmg
 ```
 
 Then go to AWS bucket for Hulse desktop and upload the newest version of the app there.
+
+Figuring out the redirection to the CLI:
+- https://www.altostra.com/blog/cli-authentication-with-auth0

@@ -1,33 +1,35 @@
-import webbrowser
-import time
-
+import http.server
 import os
+import time
+import webbrowser
+from urllib.parse import quote_plus, urlencode
+
 import hulse
 import requests
 import rumps
+from dotenv import load_dotenv
+from flask import Flask, redirect, render_template, request, session, url_for
 
 import utils
 
+load_dotenv()
 rumps.debug_mode(True)
 
-LOGIN_URL = "https://hulse-api.herokuapp.com/login"
-VALIDATE_URL = "https://hulse-api.herokuapp.com/ping"  # "http://localhost:8000/ping"  #
+LOGIN_URL = os.getenv(
+    "LOGIN_URL", "https://hulse-api.herokuapp.com/login/?source=desktop"
+)
+VALIDATE_URL = os.getenv(
+    "VALIDATE_URL", "https://hulse-api.herokuapp.com/ping"
+)  # "http://localhost:8000/ping"  #
 HULSE_ICON = "hulse_nunito_white.png"
-SETTINGS_URL = "https://dashboard.hulse.app"  # "http://localhost:8000"  #
+SETTINGS_URL = os.getenv(
+    "SETTINGS_URL", "https://dashboard.hulse.app"
+)  # "http://localhost:8000"  #
 HULSE_API_KEY = None
 
-# initialize login window
-login_window = rumps.Window(
-    message="Enter your Hulse API key below to login to your account.",
-    title="Login to Hulse",
-    cancel="Cancel",
-    ok="Submit",
-    dimensions=(300, 60),
-)
-login_window.add_button(
-    "No account yet? Create one here",
-)
-login_window.icon = HULSE_ICON
+AUTH0_DOMAIN = "dev-le9leu4t.us.auth0.com"
+AUTH0_CLIENT_ID = "pO7VIcgQe7kyrMZXyN8vOsLOoqgokBgR"
+
 host_thread = None
 
 
@@ -39,13 +41,32 @@ def validate_api_key(api_key):
     return True
 
 
+def authenticate_user(hulse_login_url):
+    global HULSE_API_KEY
+    login_thread = utils.LoginThread()
+    login_thread.start()
+    # start local server to handle authentication
+    webbrowser.open_new(hulse_login_url)
+    # retrieve the api key upon finishing login
+    while not login_thread.get_api_key():
+        time.sleep(0.1)
+
+    print("got an Hulse API key")
+    return login_thread.get_api_key(), login_thread
+
+
 def login(_):
     """Prompt user for login credentials (API key) or redirect towards signup page."""
     global HULSE_API_KEY
-    window_response = login_window.run()
-    if window_response.clicked == 1 and validate_api_key(window_response.text):
-        # post a request to the server to check if api key is valid
-        HULSE_API_KEY = window_response.text
+    # run the authentication using auth0
+    api_key, login_thread = authenticate_user(LOGIN_URL)
+    if api_key and login_thread:
+        # stop login server
+        login_thread.raise_exception(SystemExit)
+        login_thread.join()
+
+        # acknowledge login on app
+        HULSE_API_KEY = api_key
         rumps.notification(
             title="Successfully logged in!",
             subtitle="Your API key was successfully validated.",
@@ -54,10 +75,6 @@ def login(_):
         start_host_item.set_callback(start_host)
         settings_item.set_callback(settings)
         login_item.set_callback(None)
-    elif window_response.clicked == 2:
-        webbrowser.open_new(LOGIN_URL)
-    else:
-        pass
 
 
 def start_host(_):

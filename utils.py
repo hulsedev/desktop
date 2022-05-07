@@ -1,6 +1,9 @@
 import inspect
+import os
 import ctypes
 import threading
+
+from flask import Flask, redirect, render_template, request, session, url_for
 
 
 def _async_raise(tid, exctype):
@@ -39,3 +42,37 @@ class HostThread(threading.Thread):
 
     def raise_exception(self, exctype):
         _async_raise(self._get_my_tid(), exctype)
+
+
+class LoginThread(HostThread):
+    def __init__(
+        self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None
+    ):
+        super().__init__(
+            group=group,
+            target=target,
+            name=name,
+            args=args,
+            kwargs=kwargs,
+            daemon=daemon,
+        )
+        self.api_key = None
+
+        self.app = Flask(__name__)
+        self.app.secret_key = os.getenv("SECRET_KEY", "mysecretkey")
+
+        @self.app.route("/")
+        def home():
+            self.api_key = request.args.get("authToken")
+            return redirect("https://www.hulse.app/success")
+
+    def run(self):
+        try:
+            self.app.run(host="0.0.0.0", port=4240)
+        except Exception as e:
+            print("handled exception here")
+            return True
+        return False
+
+    def get_api_key(self):
+        return self.api_key
