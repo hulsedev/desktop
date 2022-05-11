@@ -37,6 +37,9 @@ cp -vp ${GOOD_LIB} ${DIR_TO_OVER_WRITE}
 rm -vrf ${FULL_APP_NAME}/Contents/Resources/lib/python3.9/todoist/.DS_Store
 rm -vrf ${FULL_APP_NAME}/Contents/Resources/lib/python3.9/numpy/f2py/tests/src/assumed_shape/.f2py_f2cmap
 
+# deleting template using old sdks
+rm -vrf ${FULL_APP_NAME}/Contents/Resources/lib/python3.9/py2app/bundletemplate/prebuilt/main-i386
+rm -vrf ${FULL_APP_NAME}/Contents/Resources/lib/python3.9/py2app/bundletemplate/prebuilt/main-intel
 #
 # This is a real certificate - expires 21 September 2026
 #
@@ -79,4 +82,3 @@ find "${FULL_APP_NAME}/Contents/Resources/lib/python3.9/torch/bin" |
 
 codesign --sign "${IDENTITY}" ${OPTIONS} "${FULL_APP_NAME}/Contents/MacOS/python"               >> ${LOGFILE} 2>&1
 codesign --sign "${IDENTITY}" ${OPTIONS} "${FULL_APP_NAME}/Contents/MacOS/${APPLICATION_NAME}"  >> ${LOGFILE} 2>&1
-
