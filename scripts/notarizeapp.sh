@@ -33,6 +33,8 @@ echo "${txReverse}Create a ZIP archive suitable for notarization${txReset}"
 echo "${txReverse}Create a DMG suitable for notarization${txReset}"
 appdmg "${FULL_PROJECT_DIR}/config/dmg/${ARCH}.json" "${DMG_PATH}"
 
+# do we need to sign the dmg too?
+
 #
 #  assumes Xcode 13 is installed
 #  assumes you added an entry APP_PASSWORD to your keychain

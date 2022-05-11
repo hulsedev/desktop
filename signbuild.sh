@@ -10,10 +10,10 @@ rm -rf build/ && rm -rf dist/
 for arch in ${archs[*]}; do
     echo "Building for architecture: ${arch}"
     python3 setup.py py2app --bdist-base=build/$arch --dist-dir=dist/$arch --arch=$arch
-    
-    echo "Signing app for ${arch}"
+    echo "Preparing app for distribution for ${arch}"
     bash scripts/python39zipsign.sh $PROJECT_DIR $APPLICATION_NAME $arch
     bash scripts/signapp.sh $PROJECT_DIR $APPLICATION_NAME $arch
+    exit 1
     bash scripts/notarizeapp.sh $PROJECT_DIR $APPLICATION_NAME $arch
     bash scripts/stapleapp.sh $PROJECT_DIR $APPLICATION_NAME $arch
     bash scripts/verifysigning.sh $PROJECT_DIR $APPLICATION_NAME $arch

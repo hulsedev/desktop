@@ -23,7 +23,7 @@ export FULL_PATH="${PROJECTS_BASE}/${PROJECT_DIR}"
 
 export APP="${FULL_PATH}/dist/${ARCH}/${APPLICATION_NAME}.app"
 
-export TEMP_DIR="./tmp"
+export TEMP_DIR="/tmp"
 export ORIGINAL_ZIP_DIR="${APP}/Contents/Resources/lib"
 export UNZIP_DIR="python39"
 export ZIP_NAME="python39.zip"
